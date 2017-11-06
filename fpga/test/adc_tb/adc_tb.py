@@ -78,17 +78,17 @@ class ADC:
             data_out = 0
             channel = 0
             self.dut.dout_i = 1
-            yield FallingEdge(self.dut.ncs_o)
-            self.dut.dout_i = 0
-            for i in range(16):
-                bit = 15-i
-                yield FallingEdge(self.dut.sclk_o)
-                channel = channel*2 + self.dut.din_o.value.integer
-                if (i==4):
-                    self.dut._log.info("> Channel to read: {}, value: {}".format(channel, self.ch_val[0][channel]))
-                    data_out = self.ch_val[0][channel]
-                self.dut.dout_i = (data_out&(1<<bit))/(1<<bit)
-            yield RisingEdge(self.dut.ncs_o)
+            if self.dut.ncs_o is not True:
+                self.dut.dout_i = 0
+                for i in range(16):
+                    bit = 15-i
+                    yield FallingEdge(self.dut.sclk_o)
+                    channel = channel*2 + self.dut.din_o.value.integer
+                    if (i==4):
+                        self.dut._log.info("> Channel to read: {}, value: {}".format(channel, self.ch_val[0][channel]))
+                        data_out = self.ch_val[0][channel]
+                    self.dut.dout_i = (data_out&(1<<bit))/(1<<bit)
+                yield RisingEdge(self.dut.sclk_o)
 
 @cocotb.test()
 def test(dut):
