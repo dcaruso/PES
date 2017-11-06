@@ -41,7 +41,6 @@ class ADC:
         self.dut.auto_inc_i = 0
         self.dut.start_i = 0
         self.ch_val = np.random.randint(1<<12, size=(1, 8))
-        # self.ch_val = [[4094,4094,4094,4094,4094,4094,4094,4094]]
 
     @cocotb.coroutine
     def reset(self):
@@ -52,10 +51,7 @@ class ADC:
         yield RisingEdge(self.dut.clk_i)
 
     def read_channel(self, channel):
-        self.xd = np.random.randint(14)
-        self.yd = np.random.randint(14)
-        self.xp = self.xp + self.xd
-        self.yp = self.yp + self.yd
+        return self.ch_val[0][channel]
 
     @cocotb.coroutine
     def conversion_monitor(self, e):
