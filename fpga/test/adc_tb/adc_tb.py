@@ -129,4 +129,14 @@ def test(dut):
         yield RisingEdge(dut.clk_i)
     dut._log.info("> (Auto INC) test: Ok!")
 
+    dut._log.info("> (Continuous conversion) test: Start")
+    dut.auto_inc_i=0
+    dut.ch_num_i=0
+    dut.start_i =1
+    for i in range(8):
+        yield conversion_end.wait()
+        if (adc_dev.read_channel(0) != dut.data_an_o.value.integer):
+            dut._log.error("> (Continuous conversion) ADC reference: {}, receiver: {}".format(adc_dev.read_channel(0), dut.data_an_o.value.integer))
+        adc_dev.take_new_values()
+    dut._log.info("> (Continuous conversion) test: Ok!")
     dut._log.info("> End of test!")
