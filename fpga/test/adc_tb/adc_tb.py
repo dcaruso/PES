@@ -104,16 +104,15 @@ def test(dut):
         ch_list = list(range(8))
         random.shuffle(ch_list)
         for ch in ch_list:
-            dut._log.info("> (Test ADC) Random Channel reading: {}".format(ch))
+            dut._log.info("> (Random Channel) reading: {}".format(ch))
             yield adc_dev.start_convertion(ch)
             yield conversion_end.wait()
             if (adc_dev.ch_val[0][ch] != dut.data_an_o.value.integer):
                 dut._log.error("> (Test ADC) ADC reference: {}, receiver: {}".format(adc_dev.ch_val[0][ch], dut.data_an_o.value.integer))
                 raise TestFailure("> (Test ADC) Error!")
             yield RisingEdge(dut.clk_i)
-            yield RisingEdge(dut.clk_i)
-            yield RisingEdge(dut.clk_i)
-            yield RisingEdge(dut.clk_i)
 
-        dut._log.info("> Ok")
+    dut._log.info("> (Random Channel) test: Ok!")
+
+
     dut._log.info("> End of test!")
