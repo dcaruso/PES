@@ -100,6 +100,8 @@ def test(dut):
     conversion_end = Event("conversion_monitor")
     cocotb.fork(adc_dev.conversion_monitor(conversion_end))
     yield adc_dev.reset()
+
+    dut._log.info("> (Random Channel) test: Start")
     for i in range(10):
         ch_list = list(range(8))
         random.shuffle(ch_list)
@@ -108,11 +110,24 @@ def test(dut):
             yield adc_dev.start_convertion(ch)
             yield conversion_end.wait()
             if (adc_dev.ch_val[0][ch] != dut.data_an_o.value.integer):
-                dut._log.error("> (Test ADC) ADC reference: {}, receiver: {}".format(adc_dev.ch_val[0][ch], dut.data_an_o.value.integer))
-                raise TestFailure("> (Test ADC) Error!")
+                dut._log.error("> (Random Channel) ADC reference: {}, receiver: {}".format(adc_dev.ch_val[0][ch], dut.data_an_o.value.integer))
+                raise TestFailure("> (Random Channel) Error!")
             yield RisingEdge(dut.clk_i)
 
     dut._log.info("> (Random Channel) test: Ok!")
 
+    dut._log.info("> (Auto INC) test: Start")
+    dut.auto_inc_i = 1
+    for i in range(8):
+        yield adc_dev.start_convertion(0);
+        yield conversion_end.wait()
+        if (adc_dev.ch_val[0][i] != dut.data_an_o.value.integer):
+            dut._log.error("> (Auto INC) ADC reference: {}, receiver: {}".format(adc_dev.ch_val[0][i], dut.data_an_o.value.integer))
+            raise TestFailure("> (Auto INC) Error!")
+        if (i != dut.ch_num_o.value.integer):
+            dut._log.error("> (Auto INC) Wrong Channel Selected: {}, expected: {}".format(dut.ch_num_o.value.integer, i))
+            raise TestFailure("> (Auto INC) Error!")
+        yield RisingEdge(dut.clk_i)
+    dut._log.info("> (Auto INC) test: Ok!")
 
     dut._log.info("> End of test!")
