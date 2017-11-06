@@ -78,7 +78,7 @@ class ADC:
             data_out = 0
             channel = 0
             self.dut.dout_i = 1
-            if self.dut.ncs_o is not True:
+            if self.dut.ncs_o.value.integer==0:
                 self.dut.dout_i = 0
                 for i in range(16):
                     bit = 15-i
@@ -89,6 +89,8 @@ class ADC:
                         data_out = self.ch_val[0][channel]
                     self.dut.dout_i = (data_out&(1<<bit))/(1<<bit)
                 yield RisingEdge(self.dut.sclk_o)
+            else:
+                yield RisingEdge(self.dut.clk_i)
 
 @cocotb.test()
 def test(dut):
