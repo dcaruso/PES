@@ -53,6 +53,9 @@ class ADC:
     def read_channel(self, channel):
         return self.ch_val[0][channel]
 
+    def take_new_values(self):
+        self.ch_val = np.random.randint(1<<12, size=(1, 8))
+
     @cocotb.coroutine
     def conversion_monitor(self, e):
         while True:
