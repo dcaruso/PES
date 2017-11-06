@@ -95,10 +95,10 @@ def test(dut):
     dut._log.info("> Starting Test")
     cocotb.fork(Clock(dut.clk_i, 20, units='ns').start())
     adc_dev = ADC(dut)
+    yield adc_dev.reset()
     cocotb.fork(adc_dev.spi_slave())
     conversion_end = Event("conversion_monitor")
     cocotb.fork(adc_dev.conversion_monitor(conversion_end))
-    yield adc_dev.reset()
 
     dut._log.info("> (Random Channel) test: Start")
     for i in range(10):
