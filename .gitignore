@@ -1,0 +1,3 @@
+# For COCOTB
+*/**/sim_build
+*/**/*.pyc
