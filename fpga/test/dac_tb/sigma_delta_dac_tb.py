@@ -62,30 +62,25 @@ class SD_DAC_Ctrl:
             yield RisingEdge(self.dut.clk_i)
             self.signal_out.append(self.dut.data_o.value.integer)
 
-    @cocotb.coroutine
-    def sigma_delta_2ord_model(self, bits, size):
+    def sigma_delta_2ord_model(self, bits, size, signal):
         self.dut._log.info("> Start model")
         acc1 = 0
         acc2 = 0
         feedback =0
         out = 0
-        while True:
-            yield RisingEdge(self.dut.clk_i)
-            if (self.dut.ena_i.value.integer==1):
-                yield RisingEdge(self.dut.clk_i)
-                for n in range(size):
-                    for b in range(bits):
-                        acc1 = (self.dut.data_s.value.integer)+acc1 -feedback
-                        acc2 = acc1 + acc2 -feedback
-                        if (acc2 > 0):
-                            feedback = 2**bits
-                            out = 1
-                            self.signal_model=np.concatenate((np.ones(1),self.signal_model),axis=1)
-                        else:
-                            feedback = -2**bits
-                            out = 0
-                            self.signal_model=np.concatenate((np.zeros(1),self.signal_model),axis=1)
-                        yield RisingEdge(self.dut.clk_i)
+        for n in range(size):
+            for b in range(bits):
+                acc1 = signal[n] + acc1 -feedback
+                acc2 = acc1 + acc2 -feedback
+                if (acc2 > 0):
+                    feedback = 2**bits
+                    out = 1
+                    self.signal_model=np.concatenate((np.ones(1),self.signal_model),axis=1)
+                else:
+                    feedback = -2**bits
+                    out = 0
+                    self.signal_model=np.concatenate((np.zeros(1),self.signal_model),axis=1)
+
 
     def get_signal(self):
         return self.signal_out
@@ -160,7 +155,7 @@ def test(dut):
 
     cocotb.fork(dac_dev.signal_reconstructor())
     
-    cocotb.fork(dac_dev.sigma_delta_2ord_model(bits,N))
+    dac_dev.sigma_delta_2ord_model(bits,N,s)
     
     dut.ena_i = 1
     for n in range(len(s)):
