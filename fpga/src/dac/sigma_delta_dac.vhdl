@@ -33,7 +33,7 @@ entity sigma_delta_dac is
         rst_i          : in  std_logic;
         ena_i          : in  std_logic;
         sample_rate_i  : in  std_logic;
-        data_i         : in  std_logic_vector((WBITS-1) downto 0);
+        data_i         : in  signed((WBITS-1) downto 0);
         data_o         : out std_logic);
 end sigma_delta_dac;
 
@@ -46,7 +46,7 @@ architecture BEHAVIOUR of sigma_delta_dac is
     signal feedback         : signed(WBITS+2 downto 0);
     constant INC            : signed(WBITS+2 downto 0):=to_signed((2**(WBITS)),WBITS+3);
     constant DEC            : signed(WBITS+2 downto 0):=to_signed(-(2**(WBITS)),WBITS+3);
-    signal data_s           : std_logic_vector(WBITS+2 downto 0);
+    signal data_s           : signed(WBITS+2 downto 0);
 
 begin
 
@@ -57,7 +57,7 @@ begin
             if rst_i='1' then
                 data_s <= (others=>'0');
             elsif (sample_rate_i='1' and ena_i='1') then
-                data_s <= "000"& data_i;
+                data_s <= resize(data_i,WBITS+3);
             end if;
         end if;
     end process SAMPLE_RATE;
@@ -65,7 +65,7 @@ begin
     FIRST_ACC:
     process (data_s, feedback, loop1)
     begin
-        acc1 <= signed(data_s) - feedback + loop1;
+        acc1 <= data_s - feedback + loop1;
     end process FIRST_ACC;
 
     SECOND_ACC:

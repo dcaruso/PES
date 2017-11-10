@@ -142,7 +142,7 @@ def test(dut):
     N =500
     t = np.linspace(0, (N-1)/Fs, N)
     Fc = Fs*0.005
-    s = ((np.sin(2*np.pi*Fc*t)+1)/2)*((2**(bits-1)))
+    s = ((np.sin(2*np.pi*Fc*t)))*((2**(bits-1)-1))
     signal_dut=[]
 
 
