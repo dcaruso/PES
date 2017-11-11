@@ -30,16 +30,17 @@ use work.coefficients.all;
 
 entity pmacd is
     generic(
-        FW_REGS     : natural:=0;
-        BW_REGS     : natural:=0;
-        WBITS_IN    : natural:=10;
-        WBITS_OUT   : natural:=28);
+        FW_REGS      : natural:=0;
+        BW_REGS      : natural:=0;
+        WBITS_IN     : natural:=10;
+        WBITS_OUT    : natural:=28);
     port(
-        clk_i       : in    std_logic;
-        rst_i       : in    std_logic;
-        ena_i       : in    std_logic;
-        data_i      : in    signed((WBITS_IN-1) downto 0);
-        data_o      : out   signed((WBITS_OUT-1) downto 0)
+        clk_i        : in    std_logic;
+        rst_i        : in    std_logic;
+        ena_i        : in    std_logic;
+        sample_rate_i: in    std_logic;
+        data_i       : in    signed((WBITS_IN-1) downto 0);
+        data_o       : out   signed((WBITS_OUT-1) downto 0)
         );
 end entity pmacd;
 
@@ -51,6 +52,7 @@ architecture BEHAVIOUR of pmacd is
 
     signal pipei        : signed((WBITS_IN-1) downto 0);
     signal pipeo        : signed((WBITS_OUT-1) downto 0);
+    signal ena          : std_logic;
 
     signal x_i          : signed((WBITS_IN-1) downto 0);
     signal xdel         : signed_array(0 to (H_QTY-1));
@@ -59,6 +61,7 @@ architecture BEHAVIOUR of pmacd is
 
 begin
 
+    ena <= ena_i and sample_rate_i;
 --------------------------------------------------------------------------------------------
 -- Input Pipeline
 --------------------------------------------------------------------------------------------
@@ -70,7 +73,7 @@ begin
             LEN     => FW_REGS,
             WBITS   => WBITS_IN)
         port map(
-            clk_i => clk_i, rst_i => rst_i, data_i => data_i, data_o => pipei, ena_i => ena_i);
+            clk_i => clk_i, rst_i => rst_i, data_i => data_i, data_o => pipei, ena_i => ena);
     end generate WITH_INPUT_PIPELINE;
   
     WITHOUT_INPUT_PIPELINE:
@@ -88,7 +91,7 @@ begin
         LEN     => H_QTY,
         WBITS   => WBITS_IN)
     port map(
-        clk_i => clk_i, rst_i => rst_i, data_i => x_i, data_o => xdel, ena_i => ena_i);
+        clk_i => clk_i, rst_i => rst_i, data_i => x_i, data_o => xdel, ena_i => ena);
 
 --------------------------------------------------------------------------------------------
 -- MAC Filter
@@ -124,7 +127,7 @@ begin
             LEN     => FW_REGS,
             WBITS   => WBITS_OUT)
         port map(
-            clk_i => clk_i, rst_i => rst_i, data_i => pipeo, data_o => data_o, ena_i => ena_i);
+            clk_i => clk_i, rst_i => rst_i, data_i => pipeo, data_o => data_o, ena_i => ena);
     end generate WITH_OUTPUT_PIPELINE;
   
     WITHOUT_OUTPUT_PIPELINE:

@@ -40,6 +40,7 @@ class Filter_Ctrl:
         self.dut.data_i = 0
         self.dut.rst_i = 1
         self.dut.ena_i = 0
+        self.dut.sample_rate_i = 0
         self.signal_out = np.zeros(1)
         self.signal_model = []
 
@@ -72,6 +73,7 @@ def test(dut):
 
     dut.ena_i=1
     dut.data_i = 1
+    dut.sample_rate_i = 1
     for i in range(100):
         yield RisingEdge(dut.clk_i)
         dut.data_i=0
