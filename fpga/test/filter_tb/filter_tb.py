@@ -72,14 +72,25 @@ def test(dut):
 
     dut.ena_i=1
     dut.data_i = 1
-    for i in range(40):
+    for i in range(60):
         yield RisingEdge(dut.clk_i)
         dut.data_i=0
 
-    signal_out = filter_dev.get_signal()
-    spec = 20 * np.log10(abs(fft(signal_out)))
-    plt.plot(spec[0:len(spec)/2])
+    b = filter_dev.get_signal()
+    wq, hq = sig.freqz(b)
+    wq = wq/(2*np.pi)
+    fig = plt.figure()
+    plt.title('Digital filter frequency response')
+    ax1 = fig.add_subplot(111)
+    plt.plot(wq, 20 * np.log10(abs(hq)), 'r')
+    plt.ylabel('Amplitude int [dB]', color='r')
+    plt.xlabel('Frequency [rad/sample]')
+    ax2 = ax1.twinx()
+    angles_q = np.unwrap(np.angle(hq))
+    plt.plot(wq, angles_q, 'y')
+    plt.ylabel('Angle int (radians)', color='y')
+    plt.grid()
+    plt.axis('tight')
     plt.show()
 
-    
     dut._log.info("> End of test!")
