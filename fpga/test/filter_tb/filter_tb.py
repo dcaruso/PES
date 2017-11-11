@@ -72,7 +72,7 @@ def test(dut):
 
     dut.ena_i=1
     dut.data_i = 1
-    for i in range(60):
+    for i in range(100):
         yield RisingEdge(dut.clk_i)
         dut.data_i=0
 
