@@ -40,7 +40,7 @@ class Filter_Ctrl:
         self.dut.data_i = 0
         self.dut.rst_i = 1
         self.dut.ena_i = 0
-        self.signal_out = []
+        self.signal_out = np.zeros(1)
         self.signal_model = []
 
     @cocotb.coroutine
@@ -56,7 +56,7 @@ class Filter_Ctrl:
         self.dut._log.info("> Start reconstructor")
         while True:
             yield RisingEdge(self.dut.clk_i)
-            self.signal_out.append(self.dut.data_o.value.signed_integer)
+            self.signal_out=np.append(self.signal_out, self.dut.data_o.value.signed_integer)
 
     def get_signal(self):
         return self.signal_out
