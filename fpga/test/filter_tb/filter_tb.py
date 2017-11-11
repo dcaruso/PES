@@ -33,9 +33,6 @@ import pylab as plt
 import numpy as np
 import scipy.signal as sig
 from scipy.fftpack import fft, ifft, fftshift
-import math
-from scipy.signal import butter, lfilter
-from scipy import optimize
 
 class Filter_Ctrl:
     def __init__(self, dut):
