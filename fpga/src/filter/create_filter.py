@@ -12,8 +12,10 @@ def configure_parser(parser):
     parser.add_argument("-o", "--output", type=str, default='coef_pkg.vhdl', help="File with coefficients")
     parser.add_argument("-i", "--input", type=str, default='tmp_coef_pkg.vhdl', help="Template Input vhdl")
     parser.add_argument("-b", "--bits", type=int, default=10, help="Bit width of each coefficient")
-    parser.add_argument("-q", "--quantity", type=int, default=20, help="Quantity of coefficient")
-    parser.add_argument("-f1", "--fcutoff1", type=float, default=0.1, help="Frequency cut off 1")
+    parser.add_argument("-n", "--numtaps", type=int, default=20, help="numtaps of coefficient")
+    parser.add_argument("-fc", "--fcutoff", type=float, default=0.2, help="Frequency cut off")
+    parser.add_argument("-w", "--trans_width", type=float, default=0.4, help="Transband width")
+    parser.add_argument("-t", "--filter_type", type=str, default='low_pass', help="Filter types [low_pass, band_pass, high_pass]")
 
 def quantize (bits, array):
     q = []
@@ -28,25 +30,31 @@ if __name__ == '__main__':
     configure_parser(parser)
     args = parser.parse_args()
 
-    
-    b = sig.firwin(args.quantity, args.fcutoff1)
+    if (args.filter_type=='low_pass'):
+        b = sig.firwin(args.numtaps, args.fcutoff)
+    if (args.filter_type=='high_pass'):
+        b = sig.firwin(args.numtaps, args.fcutoff, pass_zero=False)
+    if (args.filter_type=='band_pass'):
+        b = sig.firwin(args.numtaps, [args.fcutoff, args.fcutoff+ args.trans_width], pass_zero=False)
+
     qb, qf = quantize(args.bits,b)
 
     coef_values_str = ','.join(str(x) for x in qb)
-    print(coef_values_str)
 
     with open(args.input, 'r') as f:
         file_content = f.read()
 
-    file_content = file_content.format(coef_qty=args.quantity, coef_values=coef_values_str, coef_bits=args.bits, coef_max=(2**(args.bits-1)), coef_min=(-2**(args.bits-1)))
+    file_content = file_content.format(coef_qty=args.numtaps, coef_values=coef_values_str, coef_bits=args.bits, coef_max=(2**(args.bits-1)), coef_min=(-2**(args.bits-1)))
 
     with open(args.output, 'w') as f:
         f.write(file_content)
 
     print('Created file %s' % args.output)
 
+    qb = np.concatenate((np.zeros(10),qb,np.zeros(10)), axis=1)
+    print(qb)
     w, h = sig.freqz(b)
-    wq, hq = sig.freqz(qf)
+    wq, hq = sig.freqz(qb)
     w = w/(2*np.pi)
     fig = plt.figure()
     plt.title('Digital filter frequency response')
@@ -65,5 +73,6 @@ if __name__ == '__main__':
     plt.ylabel('Angle int (radians)', color='y')
     plt.grid()
     plt.axis('tight')
+    plt.show()
     
     plt.show()
