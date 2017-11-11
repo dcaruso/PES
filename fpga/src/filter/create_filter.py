@@ -21,7 +21,7 @@ def quantize (bits, array):
     q = []
     qf = []
     for i in range (len(array)):
-        q.append(int(array[i]*(2**(bits-1))/np.amax(array)))
+        q.append(int(array[i]*(2**(bits-1)-1)/np.amax(array)))
         qf.append((q[i]*1.0)/(2**(bits-1)))
     return q, qf
 
