@@ -16,7 +16,7 @@
 ########################################################################
 # Description
 # 
-# Makefile for Testbench for adc with COCOTB!
+# Makefile for Testbench for only fir filter with COCOTB!
 ########################################################################
 # Author: David Caruso <carusodvd@gmail.com>
 ########################################################################
