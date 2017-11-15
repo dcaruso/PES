@@ -62,18 +62,10 @@ begin
         end if;
     end process SAMPLE_RATE;
 
-    FIRST_ACC:
-    process (data_s, feedback, loop1)
-    begin
-        acc1 <= data_s - feedback + loop1;
-    end process FIRST_ACC;
+    acc1 <= data_s - feedback + loop1;
 
-    SECOND_ACC:
-    process (acc1, feedback, loop2)
-    begin
-        acc2 <= acc1 - feedback + loop2;
-    end process SECOND_ACC;
 
+    acc2 <= acc1 - feedback + loop2;
     DAC:
     process (clk_i)
     begin
