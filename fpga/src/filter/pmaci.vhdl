@@ -16,7 +16,7 @@
 --------------------------------------------------------------------------
 -- Description
 -- 
--- FIR Filter Parallel Direct
+-- FIR Filter Parallel Inverse
 --------------------------------------------------------------------------
 -- Author: David Caruso <carusodvd@gmail.com>
 --------------------------------------------------------------------------
@@ -28,7 +28,7 @@ library work;
 use work.types.all;
 use work.coefficients.all;
 
-entity pmacd is
+entity pmaci is
     generic(
         FW_REGS      : natural:=1;
         BW_REGS      : natural:=0;
@@ -42,10 +42,9 @@ entity pmacd is
         data_i       : in    signed((WBITS_IN-1) downto 0);
         data_o       : out   signed((WBITS_OUT-1) downto 0)
         );
-end entity pmacd;
+end entity pmaci;
 
-architecture BEHAVIOUR of pmacd is 
-    
+architecture BEHAVIOUR of pmaci is 
     constant WBITS_M    : natural:=WBITS_IN+WBITS_H+integer(ceil(log2(real(H_QTY))));    
     type input_delayed_t   is array (natural range <>) of signed((WBITS_IN-1) downto 0);
     type mult_t            is array (natural range <>) of signed((WBITS_M-1) downto 0);
@@ -55,10 +54,9 @@ architecture BEHAVIOUR of pmacd is
     signal ena          : std_logic;
 
     signal x_i          : signed((WBITS_IN-1) downto 0);
-    signal xdel         : signed_array(0 to (H_QTY-1));
-    signal xdel_a       : input_delayed_t(0 to H_QTY);
+    signal mdel         : signed_array(0 to (H_QTY-1));
     signal m_r          : mult_t(0 to (H_QTY-1));
-
+   
 begin
 
     ena <= ena_i and sample_rate_i;
@@ -84,37 +82,33 @@ begin
     x_i <= pipei;
 
 --------------------------------------------------------------------------------------------
--- Input Delay Line
---------------------------------------------------------------------------------------------
-    Delay_IN: entity work.DelayLine_IN
-    generic map(
-        LEN     => H_QTY,
-        WBITS   => WBITS_IN)
-    port map(
-        clk_i => clk_i, rst_i => rst_i, data_i => x_i, data_o => xdel, ena_i => ena);
-
---------------------------------------------------------------------------------------------
 -- MAC Filter
 --------------------------------------------------------------------------------------------
+   MULTIPLICATOR:
+   process (x_i)
+   begin
+      for i in 0 to H_QTY-1 loop
+          m_r(i) <= resize(to_signed(H_VALUES(i),WBITS_H) * x_i, WBITS_M);
+      end loop;
+   end process MULTIPLICATOR;
 
-    MULTIPLICATOR:
-    process (xdel)
-    begin
-        for i in 0 to H_QTY-1 loop
-            m_r(i) <= resize(to_signed(H_VALUES(i),WBITS_H) * xdel(i)(WBITS_IN-1 downto 0),WBITS_M);
-        end loop;
-    end process MULTIPLICATOR; 
+   ADJUST_OUT:
+   process (m_r)
+   begin
+      for i in 0 to H_QTY-1 loop
+          mdel(i) <= resize(m_r(i),32);
+      end loop;
+   end process ADJUST_OUT; 
 
-    ADDER:
-    process (m_r)
-        variable add : signed((WBITS_OUT-1) downto 0):=(others=>'0');
-    begin
-        add :=(others=>'0');
-        for i in 0 to H_QTY-1 loop
-            add := add + resize(m_r(i),WBITS_OUT);
-        end loop;
-        pipeo <= add;
-    end process ADDER; 
+--------------------------------------------------------------------------------------------
+-- Output Delay Line
+--------------------------------------------------------------------------------------------
+    Delay_OUT: entity work.DelayLine_OUT
+    generic map(
+        LEN => H_QTY,
+        WBITS => WBITS_OUT)
+     port map(
+        clk_i => clk_i, rst_i => rst_i, data_i => mdel, data_o => pipeo, ena_i => ena); 
  
 
 --------------------------------------------------------------------------------------------
