@@ -56,27 +56,42 @@ class Filter_Ctrl:
     def signal_reconstructor(self):
         self.dut._log.info("> Start reconstructor")
         while True:
-            yield RisingEdge(self.dut.clk_i)
+            yield RisingEdge(self.dut.sample_rate_i)
             self.signal_out=np.append(self.signal_out, self.dut.data_o.value.signed_integer)
 
     def get_signal(self):
         return self.signal_out
 
+    @cocotb.coroutine
+    def sample_rate_gen(self, rate):
+        while True:
+            self.dut.sample_rate_i = 1
+            yield RisingEdge(self.dut.clk_i)
+            self.dut.sample_rate_i = 0
+            for i in range(rate-1):
+                yield RisingEdge(self.dut.clk_i)
+
 @cocotb.test()
 def test(dut):
     dut._log.info("> Starting Test")
     cocotb.fork(Clock(dut.clk_i, 10, units='ns').start())
+    FCLK = 50000000
+    bits = 12
+    Fs = 156250
+    ratio= FCLK/Fs
+    N =200
 
     filter_dev = Filter_Ctrl(dut)
     yield filter_dev.reset()
+    cocotb.fork(filter_dev.sample_rate_gen(ratio))
     cocotb.fork(filter_dev.signal_reconstructor())
 
     dut.ena_i=1
-    dut.data_i = 1
-    dut.sample_rate_i = 1
-    for i in range(100):
-        yield RisingEdge(dut.clk_i)
-        dut.data_i=0
+    dut.data_i= 1
+    yield RisingEdge(dut.clk_i)
+    for i in range(N):
+        yield FallingEdge(dut.sample_rate_i)
+        dut.data_i = 0
 
     b = filter_dev.get_signal()
     wq, hq = sig.freqz(b)
@@ -93,6 +108,6 @@ def test(dut):
     plt.ylabel('Angle int (radians)', color='y')
     plt.grid()
     plt.axis('tight')
-    plt.show()
+    plt.savefig('filter_response_tb.png')
 
     dut._log.info("> End of test!")
