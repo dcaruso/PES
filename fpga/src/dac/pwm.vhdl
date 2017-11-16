@@ -41,6 +41,7 @@ architecture BEHAVIOUR of pwm is
 
     signal counter_r : unsigned (W_COUNT-1 downto 0);
     signal duty_r    : unsigned(W_COUNT-1 downto 0);
+    signal duty_rr    : unsigned(W_COUNT-1 downto 0);
 
 begin
 
@@ -48,11 +49,15 @@ begin
     process (clk_i)
     begin
         if rising_edge(clk_i) then
-           if rst_i='1' then
-              duty_r <= (others=>'0');
-           elsif (sample_rate_i='1' and ena_i = '1') then
-              duty_r <= unsigned(data_i);
-           end if;
+            if rst_i='1' then
+                duty_r <= (others=>'0');
+                duty_rr <= (others=>'0');
+            elsif (sample_rate_i='1' and ena_i = '1') then
+                duty_r <= unsigned(data_i);
+            end if;
+            if (counter_r=0) then
+                duty_rr <= duty_r;
+            end if;
         end if;
     end process DUTY_LATCH;
     
@@ -67,7 +72,7 @@ begin
                 if (counter_r = 0) then
                     data_o <='1';
                 end if;
-                if (counter_r = duty_r) then
+                if (counter_r = duty_rr) then
                     data_o <= '0';
                 end if;
                 counter_r <= counter_r +1;
