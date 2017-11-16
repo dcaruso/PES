@@ -45,23 +45,24 @@ port (
 end entity fir_filter;
 
 architecture RTL of fir_filter is
-    constant WITH_FILTER: boolean:=false;
-    constant CLK_FREQ   : positive:=50000000;
-    constant SAMPLE_FREQ: positive:=156250;
-    constant SPI_FREQ   : positive:=SAMPLE_FREQ*16;
-    constant SPI_PRESC  : positive:=CLK_FREQ/SPI_FREQ;
-    constant WBITS_ADC  : positive:=12;
-    constant WBITS_H    : positive:=8;
-    constant WBITS_OUT  : positive:=WBITS_ADC+WBITS_H+integer(ceil(log2(real(H_QTY))));
-    constant RETIMING_FF: positive:=2;
+    constant CLK_FREQ           : positive:=50000000;
+    constant SAMPLE_FREQ        : positive:=78125;
+    constant SPI_FREQ           : positive:=SAMPLE_FREQ*16;
+    constant SPI_PRESC          : positive:=CLK_FREQ/SPI_FREQ;
+    constant WBITS_DAC          : positive:=8;
+    constant WBITS_ADC          : positive:=12;
+    constant WBITS_OUT          : positive:=WBITS_ADC+WBITS_H+integer(ceil(log2(real(H_QTY))));
+    constant RETIMING_FF        : positive:=2;
 
-    signal rst          : std_logic;
-    signal spiena       : std_logic;
-    signal data_an_r    : std_logic_vector(15 downto 0);
-    signal data_adc     : signed((WBITS_ADC-1) downto 0);    
-    signal data_filt    : signed((WBITS_OUT-1) downto 0);
-    signal data_to_show : std_logic_vector(15 downto 0);
-    signal sample_rate_r: std_logic;
+    signal rst                  : std_logic;
+    signal spiena               : std_logic;
+    signal data_an_r            : std_logic_vector(15 downto 0);
+    signal data_adc             : signed((WBITS_ADC) downto 0);
+    signal data_filt            : signed((WBITS_OUT-1) downto 0);
+    signal data_to_show         : std_logic_vector(15 downto 0);
+    signal sample_rate_r        : std_logic;
+    signal data_dac             : std_logic_vector((WBITS_DAC-1) downto 0);
+    signal dac_rate             : std_logic;
 begin
 
     rst <= not(nrst_i);
@@ -84,51 +85,35 @@ begin
         rst_i      => rst,
         clk_i      => clk_i);
 
-    data_adc <= signed(data_an_r((WBITS_ADC-1) downto 0));
+    data_adc <= signed(data_an_r((WBITS_ADC) downto 0));
 
-    WITH_FILTER_GEN:
-    if WITH_FILTER=true generate
-        Filter_comp: entity work.pmacd
-        generic map(
-            FW_REGS => RETIMING_FF,
-            BW_REGS => RETIMING_FF,
-            WBITS_IN => WBITS_ADC,
-            WBITS_OUT=> WBITS_OUT)
-        port map(
-            clk_i  => clk_i,
-            rst_i  => rst,
-            ena_i  => '1',
-            sample_rate_i => sample_rate_r,
-            data_i => data_adc,
-            data_o => data_filt);
-    end generate WITH_FILTER_GEN;
-
-    WITHOUT_FILTER_GEN:
-    if WITH_FILTER=false generate
-        data_filt <= resize(data_adc,WBITS_OUT);
-    end generate WITHOUT_FILTER_GEN;
-
-
-    DAC_GEN: entity work.sigma_delta_dac
+    Filter_comp: entity work.pmacd
     generic map(
-        WBITS => WBITS_OUT)
+        FW_REGS => RETIMING_FF,
+        BW_REGS => RETIMING_FF,
+        WBITS_IN => WBITS_ADC+1,
+        WBITS_OUT=> WBITS_OUT)
+    port map(
+        clk_i  => clk_i,
+        rst_i  => rst,
+        ena_i  => '1',
+        sample_rate_i => sample_rate_r,
+        data_i => data_adc,
+        data_o => data_filt);
+    data_dac <= std_logic_vector(data_filt((WBITS_OUT-3) downto (WBITS_OUT-WBITS_DAC-2)));
+
+    DAC_GEN: entity work.pwm
+    generic map(
+        W_COUNT => WBITS_DAC)
     port map(
         clk_i        => clk_i,
         rst_i        => rst,
         ena_i        => '1',
         sample_rate_i=> sample_rate_r,
-        data_i       => data_filt,
+        data_i       => data_dac,
         data_o       => dac_o);
 
     -- Simple debug interface
-    data_to_show <= std_logic_vector(data_filt(15 downto 0));
-    led_o(0) <= data_to_show(1) or data_to_show(0);
-    led_o(1) <= data_to_show(3) or data_to_show(2);
-    led_o(2) <= data_to_show(5) or data_to_show(4);
-    led_o(3) <= data_to_show(7) or data_to_show(6);
-    led_o(4) <= data_to_show(9) or data_to_show(8);
-    led_o(5) <= data_to_show(11) or data_to_show(10);
-    led_o(6) <= data_to_show(13) or data_to_show(12);
-    led_o(7) <= data_to_show(15) or data_to_show(14);
+    led_o <= data_dac;
 
 end RTL;
