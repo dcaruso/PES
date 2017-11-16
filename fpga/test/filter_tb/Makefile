@@ -37,7 +37,10 @@ SRCS = 	filter_types_pkg.vhdl \
 		pipe.vhdl \
 		delayline_in.vhdl \
 		delayline_out.vhdl \
-		pmacd.vhdl
+		pmaci.vhdl \
+		pmacd.vhdl \
+		smaci.vhdl \
+		smacd.vhdl
 	
 MISC_SRCS = freq_divider.vhdl
 
