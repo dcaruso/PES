@@ -35,8 +35,8 @@ def configure_parser(parser):
     parser.add_argument("-o", "--output", type=str, default='coef_pkg.vhdl', help="File with coefficients")
     parser.add_argument("-i", "--input", type=str, default='tmp_coef_pkg.vhdl', help="Template Input vhdl")
     parser.add_argument("-b", "--bits", type=int, default=10, help="Bit width of each coefficient")
-    parser.add_argument("-n", "--numtaps", type=int, default=20, help="numtaps of coefficient")
-    parser.add_argument("-fc", "--fcutoff", type=float, default=0.2, help="Frequency cut off")
+    parser.add_argument("-n", "--numtaps", type=int, default=40, help="numtaps of coefficient")
+    parser.add_argument("-fc", "--fcutoff", type=float, default=0.01, help="Frequency cut off")
     parser.add_argument("-w", "--trans_width", type=float, default=0.4, help="Transband width")
     parser.add_argument("-t", "--filter_type", type=str, default='low_pass', help="Filter types [low_pass, band_pass, high_pass]")
 
@@ -54,6 +54,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if (args.filter_type=='low_pass'):
+        # b = sig.remez(args.numtaps, args.fcutoff-0.1, args.fcutoff, )
         b = sig.firwin(args.numtaps, args.fcutoff)
     if (args.filter_type=='high_pass'):
         b = sig.firwin(args.numtaps, args.fcutoff, pass_zero=False)
@@ -63,6 +64,8 @@ if __name__ == '__main__':
     qb, qf = quantize(args.bits,b)
 
     coef_values_str = ','.join(str(x) for x in qb)
+    # with open('taps.txt', 'w') as f:
+    #     f.write(coef_values_str)
 
     with open(args.input, 'r') as f:
         file_content = f.read()
