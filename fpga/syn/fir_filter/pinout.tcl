@@ -22,6 +22,8 @@ set_location_assignment PIN_B1  -to led_o[6]
 set_location_assignment PIN_L3  -to led_o[7]
 set_location_assignment PIN_F14  -to dac_o
 
+source fir_constraint.tcl
+
 # Commit assignments
 export_assignments
 project_close
