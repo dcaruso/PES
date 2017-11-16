@@ -1,0 +1,4 @@
+# For COCOTB
+*/**/sim_build
+*/**/*.pyc
+*/**/coef_pkg.vhdl
