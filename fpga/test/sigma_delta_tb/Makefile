@@ -33,7 +33,6 @@ endif
 SIM_ARGS = --wave=sigma_delta_dac_tb.ghw --ieee-asserts=disable-at-0
 
 SRCS = sigma_delta_dac.vhdl
-# SRCS = pwm.vhdl
 	
 MISC_SRCS = freq_divider.vhdl
 
@@ -42,7 +41,6 @@ MISC_FILES := $(addprefix $(WPWD)/../../src/misc/,$(MISC_SRCS))
 VHDL_SOURCES = $(SRCS_FILES)
 
 TOPLEVEL := sigma_delta_dac
-# TOPLEVEL := pwm
 MODULE   := sigma_delta_dac_tb
 
 include $(COCOTB)/makefiles/Makefile.inc
