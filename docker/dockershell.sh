@@ -21,6 +21,7 @@ docker run \
     -v /var/run/dbus:/var/run/dbus \
     -v /usr/share/git/completion:/usr/share/git/completion \
     --privileged \
+    -v /dev/video0:/dev/video0 \
     --net=host \
     -i -w $PWD -t -u $(id -u):$(id -g) --rm \
     -e DISPLAY=$DISPLAY \
