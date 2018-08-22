@@ -16,3 +16,24 @@ RUN git clone https://github.com/potentialventures/cocotb.git && chmod -R a+rw /
 
 ENV COCOTB /cocotb
 
+RUN apt-get install -y python-pip python-opencv python-tk
+
+RUN pip install jupyter \
+                matplotlib \
+                scipy \
+                ipython \
+                Pillow \
+                imutils
+
+RUN apt-get install -y wget
+
+RUN wget http://www.dilloneng.com/uploads/2/1/2/2/21220816/demodel-0.2.tar.gz
+
+RUN tar -xvzf demodel-0.2.tar.gz
+
+RUN cd deModel-0.2 && python setup.py install && cd ../ && rm -rf demodel-0.2
+
+RUN useradd -ms /bin/bash pesuser
+
+WORKDIR /home/pesuser
+RUN git clone https://github.com/dcaruso/PES.git /home/pesuser/pes
