@@ -32,7 +32,7 @@ Este proceso demora tiempo ya que se está descargando la imagen desde internet 
 Luego para usar siempre la imagen, en la consola correr:
 
 ```
- 	$ docker run -p 8888:8888 --user pesuser -t -i dcaruso/pes_image
+ 	$ docker run -p 8888:8888 --privileged -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev/video0:/dev/video0 --user pesuser -it pes_image dcaruso/pes_image
 ```
 
 ## Levantar jupyter notebook
@@ -40,7 +40,7 @@ Luego para usar siempre la imagen, en la consola correr:
 Una vez dentro del contenedor del `pes_image` correr:
 
 ```
-	pesuser@052c9b73f1e5:~$ jupyter notebook --ip 0.0.0.0
+	pesuser@052c9b73f1e5:~$ jupyter notebook --NotebookApp.token='' --ip 0.0.0.0
 ```
 
 Si todo ha salido bien, deberías ver como respuesta algo parecido a esto:

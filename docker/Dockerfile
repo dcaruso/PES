@@ -37,3 +37,5 @@ RUN useradd -ms /bin/bash pesuser
 
 WORKDIR /home/pesuser
 RUN git clone https://github.com/dcaruso/PES.git /home/pesuser/pes
+RUN cd /home/pesuser/pes && git pull
+RUN chown -R pesuser:pesuser /home/pesuser/pes
