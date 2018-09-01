@@ -22,7 +22,7 @@ Ver tutorial: https://docs.docker.com/docker-for-windows/install/
 En una consola (Linux) o `cmd` (Windows), correr lo siguiente para traerse la imagen
 
 ```
-	$ docker pull dcaruso/pes_image
+    $ docker pull dcaruso/pes_image
 ```
 
 Este proceso demora tiempo ya que se está descargando la imagen desde internet e instalandola en su sistema y se debe hacer una única vez o si la imagen se actualiza, se puede correr nuevamente.
@@ -31,8 +31,16 @@ Este proceso demora tiempo ya que se está descargando la imagen desde internet 
 
 Luego para usar siempre la imagen, en la consola correr:
 
+### Linux
+
 ```
- 	$ docker run -p 8888:8888 --privileged -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev/video0:/dev/video0 --user pesuser -it pes_image dcaruso/pes_image
+    $ docker run -p 8888:8888 --privileged -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev/video0:/dev/video0 -v ${PWD}:/home/pesuser/pes --user pesuser -it dcaruso/pes_image
+```
+
+### Windows
+
+```
+    $ docker run -p 8888:8888 --privileged -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev/video0:/dev/video0 -v %cd%:/home/pesuser/pes --user pesuser -it dcaruso/pes_image
 ```
 
 ## Levantar jupyter notebook
@@ -40,25 +48,27 @@ Luego para usar siempre la imagen, en la consola correr:
 Una vez dentro del contenedor del `pes_image` correr:
 
 ```
-	pesuser@052c9b73f1e5:~$ jupyter notebook --NotebookApp.token='' --ip 0.0.0.0
+    pesuser@5ff40f427922:~$ ./run_jupyter.sh
 ```
 
 Si todo ha salido bien, deberías ver como respuesta algo parecido a esto:
 
 ```
-	[I 02:53:36.756 NotebookApp] Writing notebook server cookie secret to /home/pesuser/.local/share/jupyter/runtime/notebook_cookie_secret
-	[I 02:53:36.909 NotebookApp] Serving notebooks from local directory: /home/pesuser
-	[I 02:53:36.909 NotebookApp] The Jupyter Notebook is running at:
-	[I 02:53:36.909 NotebookApp] http://(052c9b73f1e5 or 127.0.0.1):8888/?token=968d04208a2b662b3bde4fff11996d74d89e9b925eaa7845
-	[I 02:53:36.910 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
-	[W 02:53:36.910 NotebookApp] No web browser found: could not locate runnable browser.
-	[C 02:53:36.910 NotebookApp] 
-    
-    Copy/paste this URL into your browser when you connect for the first time,
-    to login with a token:
-        http://(052c9b73f1e5 or 127.0.0.1):8888/?token=968d04208a2b662b3bde4fff11996d74d89e9b925eaa7845
+[I 20:28:00.611 NotebookApp] Writing notebook server cookie secret to /home/pesuser/.local/share/jupyter/runtime/notebook_cookie_secret
+[W 20:28:00.729 NotebookApp] All authentication is disabled.  Anyone who can connect to this server will be able to run code.
+[I 20:28:00.748 NotebookApp] Serving notebooks from local directory: /home/pesuser
+[I 20:28:00.749 NotebookApp] The Jupyter Notebook is running at:
+[I 20:28:00.749 NotebookApp] http://(5ff40f427922 or 127.0.0.1):8888/
+[I 20:28:00.749 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[W 20:28:00.749 NotebookApp] No web browser found: could not locate runnable browser.
+[W 20:28:09.153 NotebookApp] Clearing invalid/expired login cookie username-localhost-8888
+
 ```
+
+### Linux
 
 Tenés que abrir un navegador web (chrome, firefox, el que tengas instalado) e ir a `http://localhost:8888/tree`
 
-Ahi te va a pedir el token de login, tenés que copiar el token que te tiró por consola, para el ejemplo sería: `968d04208a2b662b3bde4fff11996d74d89e9b925eaa7845`
+### Windows
+
+Tenés que abrir un navegador web (chrome, firefox, el que tengas instalado) e ir a `http://192.168.99.100`
