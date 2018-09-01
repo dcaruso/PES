@@ -43,9 +43,16 @@ Luego para usar siempre la imagen, en la consola correr:
     $ docker run -p 8888:8888 --privileged -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev/video0:/dev/video0 -v %cd%:/home/pesuser/pes --user pesuser -it dcaruso/pes_image
 ```
 
-## Levantar jupyter notebook
-
+## Setup
 Una vez dentro del contenedor del `pes_image` correr:
+
+```
+    pesuser@5ff40f427922:~$ ./setup.sh
+```
+
+Esto se debe hacer una sola vez y se engarga de traer el repositorio de github de la cátedra a un directorio especifico. Este directorio estará compartido con el host, de forma de poder acceder fuera del docker tambien.
+
+## Levantar jupyter notebook
 
 ```
     pesuser@5ff40f427922:~$ ./run_jupyter.sh
