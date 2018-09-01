@@ -36,6 +36,8 @@ RUN cd deModel-0.2 && python setup.py install && cd ../ && rm -rf demodel-0.2
 RUN useradd -ms /bin/bash pesuser
 
 WORKDIR /home/pesuser
-RUN git clone https://github.com/dcaruso/PES.git /home/pesuser/pes
-RUN cd /home/pesuser/pes && git pull
-RUN chown -R pesuser:pesuser /home/pesuser/pes
+
+RUN echo "git clone https://github.com/dcaruso/PES.git pes/git-pes" > /home/pesuser/setup.sh
+RUN echo "jupyter notebook --NotebookApp.token='' --ip 0.0.0.0" > /home/pesuser/run_jupyter.sh
+RUN chown -R pesuser:pesuser /home/pesuser/setup.sh /home/pesuser/run_jupyter.sh
+RUN chmod a+x /home/pesuser/setup.sh /home/pesuser/run_jupyter.sh
