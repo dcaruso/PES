@@ -1,7 +1,7 @@
 FROM debian:9
 
 RUN apt-get update && \
-    apt-get install -y gcc g++ git iverilog make python python-dev gnat clang llvm zlib1g-dev gtkwave build-essential python-numpy
+    apt-get install -y gcc g++ git iverilog make python python-dev gnat clang llvm zlib1g-dev gtkwave build-essential python-numpy vim
 
 RUN git clone https://github.com/tgingold/ghdl.git ghdl_src/ \
  && cd ghdl_src \
