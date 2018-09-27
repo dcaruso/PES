@@ -3,20 +3,55 @@
 import numpy as np
 import cv2
 import time
+import sys
+import datetime
+from influxdb import InfluxDBClient
 import collections
 import sys
 
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 smile_cascade = cv2.CascadeClassifier('haarcascade_smile.xml')
 
+grafana_host = 'localhost'
+
 cap = cv2.VideoCapture(1)
 PERCENT_MOVEMENT       = 2.1
 TRACK_IT               = 10
 show_frame             = True
-show_marks             = True
+show_marks             = False
 
-nfaces_data = collections.deque(maxlen=TRACK_IT*2)
-nsmiles_data = collections.deque(maxlen=TRACK_IT*2)
+scaling_smile          = 1.25
+minNeighbors_smile     = 22
+
+scaling_face          = 1.2
+minNeighbors_face     = 8
+
+def public_data(total_people, happies, paying_attention):
+    receiveTime=datetime.datetime.utcnow()
+    json_body = [
+        {
+            "measurement": 'total_people',
+            "time": receiveTime,
+            "fields": {
+                "value": total_people
+            }
+        },
+        {
+            "measurement": 'happies',
+            "time": receiveTime,
+            "fields": {
+                "value": happies
+            }
+        },
+        {
+            "measurement": 'paying_attention',
+            "time": receiveTime,
+            "fields": {
+                "value": paying_attention
+            }
+        }
+    ]
+    dbclient.write_points(json_body)
 
 def expand_area(x,y,w,h):
     new_w = int(w*PERCENT_MOVEMENT)
@@ -44,7 +79,7 @@ def find_new_centroid(olist, frame):
 
 def faces_detection(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, 1.2, 4)
+    faces = face_cascade.detectMultiScale(gray, scaling_face, minNeighbors_face)
     return faces
 
 def write_text_on_image(frame, nfaces, nsmiles, max_people):
@@ -65,11 +100,10 @@ def check_smile(frame, faces):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     nsmiles = 0
     for i, (x,y,w,h) in enumerate(faces):
-        print ("w={}, h={}".format(w,h))
         roi_gray = gray[y:y+h, x:x+w]
         roi_color = frame[y:y+h, x:x+w]
-        smiles = smile_cascade.detectMultiScale(roi_gray, scaleFactor= 1.2,minNeighbors=5,minSize=(12, 12))
-        if len(smiles)!=None:
+        smiles = smile_cascade.detectMultiScale(roi_gray, scaleFactor= scaling_smile,minNeighbors=minNeighbors_smile,minSize=(12, 12))
+        if (len(smiles)!=None) and (len(smiles)>0):
             nsmiles+=1
         if show_marks==True:
             for (ex,ey,ew,eh) in smiles:
@@ -91,19 +125,15 @@ def update_face_list(new_faces, old_faces):
             old_faces.append([nx,ny,nw,nh])
     return old_faces
 
-def anime_show_data(nfaces, nsmiles):
-    line_faces.set_ydata(nfaces)  # update the data
-    line_happy.set_ydata(nhappy)  # update the data
-    return line_faces, line_happy
-
-
 state = 'detection'
 track_face_list = []
 max_people = 0
+nfaces_data = collections.deque(maxlen=TRACK_IT*2)
+
+dbclient = InfluxDBClient(grafana_host, 8086, 'admin', 'admin', 'test')
 
 while(True):
     ret, frame = cap.read()
-    # frame = cv2.imread('im3.jpg')
     start = time.time()
     if state=='detection':
         new_detection_faces=faces_detection(frame)
@@ -119,25 +149,23 @@ while(True):
     end = time.time()
 
     # Collect data
-    nsmiles_data.append(check_smile(frame, track_face_list))
-    nfaces_data.append(len(track_face_list))
+    nsmiles=check_smile(frame, track_face_list)
+    nfaces = len(track_face_list)
 
-    # Filter data
-    nsmiles = int(np.median(nsmiles_data))
-    nfaces  = int(np.median(nfaces_data))
+    if max_people<nfaces:
+        max_people = nfaces
 
-    if track_time ==0:
-        if max_people<nfaces:
-            max_people = nfaces
-
-    draw_on_image(frame, track_face_list)
-    write_text_on_image(frame,nfaces,nsmiles, max_people)
+    public_data(max_people, nsmiles, nfaces)
         
     # Display the resulting frame
     if show_frame==True:
+        draw_on_image(frame, track_face_list)
+        write_text_on_image(frame,nfaces,nsmiles, max_people)
         cv2.imshow('frame',frame)
-    # sys.stdout.write("Time: %fsec, Gente: %d, Contentos: %d, Maximo: %d   \r" % (end-start, nfaces, nsmiles, max_people) )
-    # sys.stdout.flush()
+    else:
+        sys.stdout.write("Time: %fsec, Gente: %d, Contentos: %d, Maximo: %d   \r" % (end-start, nfaces, nsmiles, max_people) )
+        sys.stdout.flush()
+
     key = cv2.waitKey(1)
     if key & 0xFF == ord('q'):
         break
