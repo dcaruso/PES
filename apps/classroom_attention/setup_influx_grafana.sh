@@ -10,4 +10,4 @@ echo "Create database"
 influx -execute 'CREATE DATABASE test'
 
 echo "Starting grafana server"
-#service grafana-server start &
+service grafana-server start &
