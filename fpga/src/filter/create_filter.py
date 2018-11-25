@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
     print('Created file %s' % args.output)
 
-    qb = np.concatenate((np.zeros(10),qb,np.zeros(10)), axis=1)
+    qb = np.concatenate((np.zeros(10),qb,np.zeros(10)), axis=0)
     w, h = sig.freqz(b)
     wq, hq = sig.freqz(qf)
     w = w/(2*np.pi)
