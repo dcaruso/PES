@@ -21,15 +21,9 @@
 # Author: David Caruso <carusodvd@gmail.com>
 ########################################################################
 
-PWD=$(shell pwd)
-
-ifeq ($(OS),Msys)
-WPWD=$(shell sh -c 'pwd -W')
-PYTHONPATH := $(WPWD)/../model;$(PYTHONPATH)
-else
 WPWD=$(shell pwd)
-PYTHONPATH := $(WPWD)/../model:$(PYTHONPATH)
-endif
+PYTHONPATH := $(WPWD)/../model:$(WPWD)/../utils:$(PYTHONPATH)
+SIM = ghdl
 SIM_ARGS = --wave=filter_tb.ghw --ieee-asserts=disable-at-0
 
 FIR_SRCS = 	filter_types_pkg.vhdl \
@@ -42,7 +36,7 @@ FIR_SRCS = 	filter_types_pkg.vhdl \
 ADC_SRCS = spi.vhdl \
 		  adc.vhdl
 
-DAC_SRCS = sigma_delta_dac.vhdl
+DAC_SRCS = pwm.vhdl
 
 TOP_SRCS = fir_filter.vhdl
 	
