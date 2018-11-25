@@ -25,9 +25,6 @@ files = [
     "../../src/filter/pmacd.vhdl",
     "../../src/adc/spi.vhdl",
     "../../src/adc/adc.vhdl",
-    "../../src/dac/sigma_delta_dac.vhdl",
-    "../../src/dac/sigma_delta_dac1.vhdl",
     "../../src/dac/pwm.vhdl",
-    "../../src/dac/dac_dsm2.vhdl",
     "../../src/misc/freq_divider.vhdl",
 ]
