@@ -28,7 +28,6 @@ from cocotb.result import TestFailure, TestError, ReturnValue, SimFailure
 from cocotb.binary import BinaryValue
 import sys
 import random
-import Image
 import pylab as plt
 import numpy as np
 
@@ -93,7 +92,7 @@ class ADC:
                 yield RisingEdge(self.dut.clk_i)
 
 @cocotb.test()
-def test(dut):
+def test_random_channel(dut):
     dut._log.info("> Starting Test")
     cocotb.fork(Clock(dut.clk_i, 20, units='ns').start())
     adc_dev = ADC(dut)
@@ -117,6 +116,15 @@ def test(dut):
 
     dut._log.info("> (Random Channel) test: Ok!")
 
+@cocotb.test()
+def test_auto_inc(dut):
+    dut._log.info("> Starting Test")
+    cocotb.fork(Clock(dut.clk_i, 20, units='ns').start())
+    adc_dev = ADC(dut)
+    yield adc_dev.reset()
+    cocotb.fork(adc_dev.spi_slave())
+    conversion_end = Event("conversion_monitor")
+    cocotb.fork(adc_dev.conversion_monitor(conversion_end))
     dut._log.info("> (Auto INC) test: Start")
     dut.auto_inc_i = 1
     for i in range(8):
@@ -131,14 +139,24 @@ def test(dut):
         yield RisingEdge(dut.clk_i)
     dut._log.info("> (Auto INC) test: Ok!")
 
+@cocotb.test()
+def test_continuous_conversion(dut):
+    dut._log.info("> Starting Test")
+    cocotb.fork(Clock(dut.clk_i, 20, units='ns').start())
+    adc_dev = ADC(dut)
+    yield adc_dev.reset()
+    cocotb.fork(adc_dev.spi_slave())
+    conversion_end = Event("conversion_monitor")
+    cocotb.fork(adc_dev.conversion_monitor(conversion_end))
+
     dut._log.info("> (Continuous conversion) test: Start")
     dut.auto_inc_i=0
-    dut.ch_num_i=0
+    dut.ch_num_i=7
     dut.start_i =1
     for i in range(8):
         yield conversion_end.wait()
-        if (adc_dev.read_channel(0) != dut.data_an_o.value.integer):
+        if (adc_dev.read_channel(7) != dut.data_an_o.value.integer):
             dut._log.error("> (Continuous conversion) ADC reference: {}, receiver: {}".format(adc_dev.read_channel(0), dut.data_an_o.value.integer))
+            raise TestFailure("> (Continuous conversion) Error!")
         adc_dev.take_new_values()
     dut._log.info("> (Continuous conversion) test: Ok!")
-    dut._log.info("> End of test!")
