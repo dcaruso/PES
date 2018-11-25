@@ -28,7 +28,6 @@ from cocotb.result import TestFailure, TestError, ReturnValue, SimFailure
 from cocotb.binary import BinaryValue
 import sys
 import random
-import Image
 import pylab as plt
 import numpy as np
 import scipy.signal as sig
@@ -75,11 +74,11 @@ class SD_DAC_Ctrl:
                 if (acc2 > 0):
                     feedback = 2**bits
                     out = 1
-                    self.signal_model=np.concatenate((np.ones(1),self.signal_model),axis=1)
+                    self.signal_model=np.concatenate((np.ones(1),self.signal_model),axis=0)
                 else:
                     feedback = -2**bits
                     out = 0
-                    self.signal_model=np.concatenate((np.zeros(1),self.signal_model),axis=1)
+                    self.signal_model=np.concatenate((np.zeros(1),self.signal_model),axis=0)
 
 
     def get_signal(self):

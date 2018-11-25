@@ -28,7 +28,6 @@ from cocotb.result import TestFailure, TestError, ReturnValue, SimFailure
 from cocotb.binary import BinaryValue
 import sys
 import random
-import Image
 import pylab as plt
 import numpy as np
 import scipy.signal as sig
