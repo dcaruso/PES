@@ -4,7 +4,7 @@ JedecChain;
 	DefaultMfr(6E);
 
 	P ActionCode(Cfg)
-		Device PartName(EP4CE22F17) Path("/home/david/PES/github/PES/fpga/syn/adc_pwm/") File("adcpwm.sof") MfrSpec(OpMask(1));
+		Device PartName(EP4CE22F17) Path("/home/david/UTN/pes/github/PES/fpga/syn/adc_pwm/") File("adcpwm.sof") MfrSpec(OpMask(1));
 
 ChainEnd;
 
