@@ -14,6 +14,7 @@
 ## Windows
 
 Ver tutorial: https://docs.docker.com/docker-for-windows/install/
+Nota: Si usan una versión Home de Windows, el proceso es ligeramente diferente. Fijarse bien.
 
 # Trabajar sobre la imagen de docker
 
@@ -40,7 +41,13 @@ Luego para usar siempre la imagen, en la consola correr:
 ### Windows
 
 ```
-    $ docker run -p 8888:8888 --privileged -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev/video0:/dev/video0 -v %cd%:/home/pesuser/pes --user pesuser -it dcaruso/pes_image
+    $ docker run -p 8888:8888 --privileged --name pes -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev/video0:/dev/video0 -v %cd%:/home/pesuser/pes --user pesuser -it dcaruso/pes_image
+```     
+
+si no funciona, probar este:
+ 
+``` 
+    $ docker run -p 8888:8888 --privileged --name pes -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev/video0:/dev/video0 -v /dev/bus/usb:/dev/bus/usb -v /%cd%:/home/pesuser/pes --user pesuser -it dcaruso/pes_image
 ```
 
 ## Setup
@@ -51,6 +58,20 @@ Una vez dentro del contenedor del `pes_image` correr:
 ```
 
 Esto se debe hacer una sola vez y se engarga de traer el repositorio de github de la cátedra a un directorio especifico. Este directorio estará compartido con el host, de forma de poder acceder fuera del docker tambien.
+
+## Al tener ya creado el contenedor
+Es posible que la imagen no desaparezca cuando lo cierran. Solo lo hará si queda inactiva un tiempo. Si se levanta otro contenedor con la imagen, será como 'empezar de cero'.
+Para asegurarse correr el comando
+```
+    $ docker container ls -a
+```
+Debe verse el contenedor cuyo nombre es PES (si usaron el comando de más arriba), estará detenido.
+Volver a correrlo con
+```
+    $ docker run pes
+    $ docker attach pes
+```
+El segundo comando es para entrar a la terminal desde el contenedor.
 
 ## Levantar jupyter notebook
 
@@ -78,4 +99,4 @@ Tenés que abrir un navegador web (chrome, firefox, el que tengas instalado) e i
 
 ### Windows
 
-Tenés que abrir un navegador web (chrome, firefox, el que tengas instalado) e ir a `http://192.168.99.100`
+Tenés que abrir un navegador web (chrome, firefox, el que tengas instalado) e ir a `http://127.0.0.1:8888/`
