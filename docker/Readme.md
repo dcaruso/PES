@@ -11,10 +11,17 @@
     $ sudo usermod -a -G docker $USER
 ```
 
-## Windows
+## Windows Pro / Enterprise
 
 Ver tutorial: https://docs.docker.com/docker-for-windows/install/
-Nota: Si usan una versión Home de Windows, el proceso es ligeramente diferente. Fijarse bien.
+
+## Windows Home 
+
+Tutorial: https://docs.docker.com/docker-for-windows/install-windows-home/
+
+Instalación de WSL: https://docs.microsoft.com/en-us/windows/wsl/install-win10 (no hace falta instalar una distro de linux)
+
+Abrir PowerShell como administrador: https://www.top-password.com/blog/5-ways-to-run-powershell-as-administrator-in-windows-10/
 
 # Trabajar sobre la imagen de docker
 
