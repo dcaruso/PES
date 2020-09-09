@@ -68,7 +68,7 @@ Para asegurarse correr el comando
 Debe verse el contenedor cuyo nombre es PES (si usaron el comando de más arriba), estará detenido.
 Volver a correrlo con
 ```
-    $ docker run pes
+    $ docker start pes
     $ docker attach pes
 ```
 El segundo comando es para entrar a la terminal desde el contenedor.
